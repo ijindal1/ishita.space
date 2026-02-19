@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0A0A0F">
+  <meta name="description" content="Ishita Jindal — building Memory Store, writing about AI and the things that persist.">
+  <title>Ishita Jindal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0A0A0F;
+      --bg-elevated: #111118;
+      --text: #E0E0E8;
+      --text-bright: #F0F0F5;
+      --text-muted: #7A7A90;
+      --teal: #00E5C8;
+      --cyan: #22D1EE;
+      --blue: #4D7CFF;
+      --violet: #8B5CF6;
+      --magenta: #D946EF;
+      --gold: #F5C542;
+      --green: #34D399;
+      --border: #1E1E2A;
+    }
+
+    ::selection {
+      background: var(--teal);
+      color: var(--bg);
+    }
+
+    body {
+      font-family: 'Space Mono', monospace;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      font-size: 15px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* ——— SCAN LINES ——— */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: 9998;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 1px,
+        rgba(255,255,255,0.012) 1px,
+        rgba(255,255,255,0.012) 2px
+      );
+    }
+
+    /* ——— NOISE GRAIN ——— */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      opacity: 0.035;
+      z-index: 9999;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 256px 256px;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+    }
+
+    /* ——— VERTICAL STRIPE ARTIFACT — LEFT ——— */
+    .stripe-left {
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 6px;
+      z-index: 10;
+      background: linear-gradient(
+        to bottom,
+        var(--blue) 0%,
+        var(--violet) 15%,
+        var(--teal) 30%,
+        var(--green) 45%,
+        var(--gold) 55%,
+        var(--magenta) 70%,
+        var(--cyan) 85%,
+        var(--blue) 100%
+      );
+      opacity: 0.6;
+    }
+
+    /* ——— VERTICAL STRIPE ARTIFACT — RIGHT ——— */
+    .stripe-right {
+      position: fixed;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      z-index: 10;
+      background: linear-gradient(
+        to bottom,
+        var(--cyan) 0%,
+        var(--green) 20%,
+        var(--gold) 40%,
+        var(--violet) 60%,
+        var(--blue) 80%,
+        var(--teal) 100%
+      );
+      opacity: 0.35;
+    }
+
+    /* ——— IRIDESCENT GLOW — hero bg ——— */
+    .hero-glow {
+      position: absolute;
+      top: -60px;
+      left: -200px;
+      right: -200px;
+      height: 400px;
+      z-index: -1;
+      background: radial-gradient(
+        ellipse at 30% 50%,
+        rgba(0,229,200,0.08) 0%,
+        rgba(77,124,255,0.06) 25%,
+        rgba(139,92,246,0.05) 50%,
+        transparent 70%
+      );
+      filter: blur(60px);
+    }
+
+    /* ——— HERO ——— */
+    header {
+      padding: 120px 0 80px;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+
+    header .label {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 24px;
+      opacity: 0.7;
+    }
+
+    header h1 {
+      font-size: clamp(36px, 7vw, 58px);
+      font-weight: 700;
+      line-height: 1.05;
+      color: var(--text-bright);
+      margin-bottom: 18px;
+      position: relative;
+      text-shadow:
+        -2px 0 rgba(0,229,200,0.55),
+        2px 0 rgba(139,92,246,0.45),
+        0 0 30px rgba(77,124,255,0.15);
+      animation: glitch-subtle 8s infinite;
+    }
+
+    @keyframes glitch-subtle {
+      0%, 94%, 100% {
+        text-shadow:
+          -2px 0 rgba(0,229,200,0.55),
+          2px 0 rgba(139,92,246,0.45),
+          0 0 30px rgba(77,124,255,0.15);
+      }
+      95% {
+        text-shadow:
+          -4px 0 rgba(0,229,200,0.8),
+          4px 0 rgba(139,92,246,0.7),
+          0 2px rgba(245,197,66,0.4),
+          0 0 40px rgba(77,124,255,0.25);
+      }
+      96.5% {
+        text-shadow:
+          -1px 0 rgba(0,229,200,0.55),
+          2px 0 rgba(217,70,239,0.5),
+          0 0 30px rgba(77,124,255,0.15);
+      }
+    }
+
+    header .tagline {
+      font-size: 15px;
+      color: var(--text-muted);
+      font-style: italic;
+      max-width: 500px;
+    }
+
+    header .tagline .highlight {
+      font-style: normal;
+      background: linear-gradient(90deg, var(--teal), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ——— IRIDESCENT DIVIDER ——— */
+    .divider {
+      height: 1px;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--blue) 15%,
+        var(--teal) 30%,
+        var(--green) 45%,
+        var(--gold) 55%,
+        var(--violet) 70%,
+        var(--magenta) 85%,
+        transparent 100%
+      );
+      opacity: 0.35;
+    }
+
+    /* ——— SECTIONS ——— */
+    section {
+      padding: 80px 0;
+    }
+
+    .section-label {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-label .label-text {
+      color: var(--text-muted);
+    }
+
+    .section-label .label-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--border), transparent);
+    }
+
+    .section-label .label-dot {
+      width: 5px;
+      height: 5px;
+      background: var(--violet);
+    }
+
+    /* ——— ABOUT ——— */
+    .about p {
+      font-size: 15px;
+      max-width: 580px;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+
+    .about p:last-child { margin-bottom: 0; }
+
+    .about .inline-accent {
+      color: var(--green);
+    }
+
+    /* ——— WRITING ——— */
+    .writing-list {
+      list-style: none;
+    }
+
+    .writing-list li {
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      padding: 16px 12px;
+      border-left: 2px solid var(--border);
+      margin-bottom: 2px;
+      transition: all 0.15s ease;
+    }
+
+    .writing-list li:hover {
+      background: rgba(255,255,255,0.02);
+      border-left-color: var(--teal);
+    }
+    .writing-list li:nth-child(2):hover { border-left-color: var(--cyan); }
+    .writing-list li:nth-child(3):hover { border-left-color: var(--violet); }
+    .writing-list li:nth-child(4):hover { border-left-color: var(--blue); }
+    .writing-list li:nth-child(5):hover { border-left-color: var(--gold); }
+
+    .writing-date {
+      font-size: 12px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      min-width: 100px;
+    }
+
+    .writing-title a {
+      color: var(--text-bright);
+      text-decoration: none;
+      font-weight: 700;
+      transition: color 0.2s ease, text-shadow 0.2s ease;
+    }
+
+    .writing-list li:hover .writing-title a {
+      color: var(--teal);
+      text-shadow: 0 0 14px rgba(0,229,200,0.2);
+    }
+    .writing-list li:nth-child(2):hover .writing-title a { color: var(--cyan); text-shadow: 0 0 14px rgba(34,209,238,0.2); }
+    .writing-list li:nth-child(3):hover .writing-title a { color: var(--violet); text-shadow: 0 0 14px rgba(139,92,246,0.2); }
+    .writing-list li:nth-child(4):hover .writing-title a { color: var(--blue); text-shadow: 0 0 14px rgba(77,124,255,0.2); }
+    .writing-list li:nth-child(5):hover .writing-title a { color: var(--gold); text-shadow: 0 0 14px rgba(245,197,66,0.2); }
+
+    /* ——— CONTACT ——— */
+    .links-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .links-row a {
+      font-size: 14px;
+      color: var(--text);
+      text-decoration: none;
+      padding: 8px 18px;
+      border: 1px solid var(--border);
+      transition: all 0.2s ease;
+    }
+
+    .links-row a:nth-child(1):hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      box-shadow: 0 0 12px rgba(34,209,238,0.12);
+    }
+    .links-row a:nth-child(2):hover {
+      border-color: var(--blue);
+      color: var(--blue);
+      box-shadow: 0 0 12px rgba(77,124,255,0.12);
+    }
+    .links-row a:nth-child(3):hover {
+      border-color: var(--violet);
+      color: var(--violet);
+      box-shadow: 0 0 12px rgba(139,92,246,0.12);
+    }
+    .links-row a:nth-child(4):hover {
+      border-color: var(--gold);
+      color: var(--gold);
+      box-shadow: 0 0 12px rgba(245,197,66,0.12);
+    }
+
+    /* ——— FOOTER ——— */
+    footer {
+      padding: 40px 0 60px;
+      font-size: 12px;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+    }
+
+    footer .footer-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    footer .color-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    footer .color-dots span {
+      width: 6px;
+      height: 6px;
+      display: block;
+    }
+
+    footer .color-dots span:nth-child(1) { background: var(--teal); }
+    footer .color-dots span:nth-child(2) { background: var(--blue); }
+    footer .color-dots span:nth-child(3) { background: var(--violet); }
+    footer .color-dots span:nth-child(4) { background: var(--gold); }
+    footer .color-dots span:nth-child(5) { background: var(--green); }
+    footer .color-dots span:nth-child(6) { background: var(--magenta); }
+
+    /* ——— RESPONSIVE ——— */
+    @media (max-width: 600px) {
+      header { padding: 70px 0 50px; }
+      section { padding: 50px 0; }
+
+      .writing-list li {
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .links-row {
+        flex-direction: column;
+      }
+
+      .links-row a {
+        text-align: center;
+      }
+
+      .stripe-left { width: 4px; }
+      .stripe-right { display: none; }
+      .hero-glow { left: -100px; right: -100px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="stripe-left"></div>
+  <div class="stripe-right"></div>
+
+  <div class="container">
+
+    <header>
+      <div class="hero-glow"></div>
+      <div class="label">Personal Site</div>
+      <h1>Ishita Jindal</h1>
+      <p class="tagline">Building <span class="highlight">Memory Store</span> — writing about AI and the things that persist.</p>
+    </header>
+
+    <div class="divider"></div>
+
+    <main>
+
+      <section class="about">
+        <div class="section-label">
+          <span class="label-dot"></span>
+          <span class="label-text">About</span>
+          <span class="label-line"></span>
+        </div>
+        <p>I'm the co-founder of <a href="https://memory.store" target="_blank" rel="noopener noreferrer" style="color: var(--teal); text-decoration: none; border-bottom: 1px solid var(--border); transition: border-color 0.2s;">Memory Store</a>, where we give AI the ability to remember. The through-line has always been the same question: <span class="inline-accent">how do you make AI that actually knows you?</span></p>
+        <p>I think a lot about memory architectures, founder-product fit, and what it means to build software that feels personal.</p>
+      </section>
+
+      <div class="divider"></div>
+
+      <section class="writing">
+        <div class="section-label">
+          <span class="label-dot"></span>
+          <span class="label-text">Writing</span>
+          <span class="label-line"></span>
+        </div>
+        <ul class="writing-list">
+          <li>
+            <span class="writing-date">2026.02.01</span>
+            <span class="writing-title"><a href="#">Post title goes here</a></span>
+          </li>
+          <li>
+            <span class="writing-date">2026.01.15</span>
+            <span class="writing-title"><a href="#">Another post title</a></span>
+          </li>
+          <li>
+            <span class="writing-date">2025.12.20</span>
+            <span class="writing-title"><a href="#">A third writing entry</a></span>
+          </li>
+          <li>
+            <span class="writing-date">2025.11.08</span>
+            <span class="writing-title"><a href="#">Something else entirely</a></span>
+          </li>
+          <li>
+            <span class="writing-date">2025.10.02</span>
+            <span class="writing-title"><a href="#">One more placeholder</a></span>
+          </li>
+        </ul>
+      </section>
+
+      <div class="divider"></div>
+
+      <section class="contact">
+        <div class="section-label">
+          <span class="label-dot"></span>
+          <span class="label-text">Elsewhere</span>
+          <span class="label-line"></span>
+        </div>
+        <div class="links-row">
+          <a href="https://x.com/IshitaJindal17" target="_blank" rel="noopener noreferrer">Twitter / X</a>
+          <a href="https://linkedin.com/in/ishitajindal" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+          <a href="https://memory.store" target="_blank" rel="noopener noreferrer">Memory Store</a>
+          <a href="mailto:ishita@memory.store">Email</a>
+        </div>
+      </section>
+
+    </main>
+
+    <footer>
+      <div class="footer-bar">
+        <span>&copy; 2026</span>
+        <div class="color-dots">
+          <span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+</body>
+</html>

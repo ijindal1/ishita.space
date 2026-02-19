@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Font Comparison — Ishita Jindal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500&family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@300;400;500;600&family=Syne:wght@400;500;600;700;800&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0A0A0F;
+      --rose: #E8658A;
+      --magenta: #C43D6B;
+      --blush: #F2A0B5;
+      --deep-teal: #1A6B63;
+      --teal: #2AA89E;
+      --cream: #F0E6E0;
+      --text: #D4C8C0;
+      --text-muted: #8A7D78;
+    }
+
+    ::selection {
+      background: var(--rose);
+      color: var(--bg);
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Space Mono', monospace;
+    }
+
+    /* ——— SCAN LINES ——— */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: 100;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 1px,
+        rgba(255,255,255,0.012) 1px,
+        rgba(255,255,255,0.012) 2px
+      );
+    }
+
+    /* ——— NOISE GRAIN ——— */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      opacity: 0.03;
+      z-index: 101;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 256px 256px;
+    }
+
+    /* ——— FULL-SCREEN VIDEO BACKGROUND ——— */
+    .video-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    .video-bg video {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      min-width: 100%;
+      min-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: cover;
+    }
+
+    .video-overlay {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at center, transparent 30%, rgba(10,10,15,0.6) 100%),
+        linear-gradient(to bottom, transparent 60%, rgba(10,10,15,0.8) 100%),
+        linear-gradient(to bottom, rgba(10,10,15,0.25) 0%, rgba(10,10,15,0.15) 50%, rgba(10,10,15,0.4) 100%);
+      z-index: 1;
+    }
+
+    /* ——— PAGE OVERLAY ——— */
+    .page {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      height: 100vh;
+      display: grid;
+      grid-template-rows: 1fr auto;
+      grid-template-columns: 1fr 1fr;
+      grid-template-areas:
+        "hero index"
+        "links links";
+    }
+
+    /* ——— HERO ——— */
+    .hero {
+      grid-area: hero;
+      align-self: start;
+      padding: 10vh 0 0 8vw;
+    }
+
+    .hero h1 {
+      font-size: clamp(36px, 6vw, 64px);
+      font-weight: 700;
+      line-height: 1.05;
+      color: var(--cream);
+      margin-bottom: 16px;
+      text-shadow:
+        0 0 40px rgba(232,101,138,0.15),
+        0 0 80px rgba(10,10,15,0.5);
+      transition: all 0.4s ease;
+    }
+
+    .hero .tagline {
+      font-size: clamp(13px, 1.4vw, 16px);
+      color: var(--text);
+      font-style: italic;
+      max-width: 400px;
+      line-height: 1.6;
+      text-shadow: 0 1px 8px rgba(10,10,15,0.8);
+      transition: all 0.4s ease;
+    }
+
+    /* ——— INDEX ——— */
+    .index {
+      grid-area: index;
+      align-self: center;
+      justify-self: end;
+      padding-right: 8vw;
+      padding-top: 8vh;
+    }
+
+    .index ol {
+      list-style: none;
+      counter-reset: index;
+    }
+
+    .index ol li {
+      counter-increment: index;
+      margin-bottom: 6px;
+    }
+
+    .index ol li a {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 14px;
+      color: var(--cream);
+      text-decoration: none;
+      font-size: clamp(13px, 1.2vw, 15px);
+      padding: 6px 0;
+      transition: all 0.4s ease;
+      text-shadow: 0 1px 8px rgba(10,10,15,0.8);
+    }
+
+    .index ol li a::before {
+      content: counter(index, decimal-leading-zero);
+      font-size: 12px;
+      color: var(--rose);
+      font-weight: 700;
+      min-width: 22px;
+      text-shadow: 0 0 12px rgba(232,101,138,0.3);
+      font-family: 'Space Mono', monospace;
+    }
+
+    .index ol li a:hover {
+      color: var(--blush);
+      text-shadow: 0 0 16px rgba(242,160,181,0.25);
+    }
+
+    /* ——— FOOTER LINKS ——— */
+    .links {
+      grid-area: links;
+      justify-self: start;
+      align-self: end;
+      padding: 0 0 5vh 8vw;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+    }
+
+    .links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: all 0.4s ease;
+      text-shadow: 0 1px 6px rgba(10,10,15,0.8);
+    }
+
+    .links a:hover {
+      color: var(--rose);
+    }
+
+    .links .dot {
+      color: var(--text-muted);
+      opacity: 0.4;
+      user-select: none;
+    }
+
+    /* ——— VARIANT SWITCHER ——— */
+    .switcher {
+      position: fixed;
+      bottom: 5vh;
+      right: 8vw;
+      z-index: 200;
+      display: flex;
+      gap: 6px;
+    }
+
+    .switcher button {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      padding: 8px 14px;
+      border: 1px solid rgba(138,125,120,0.3);
+      background: rgba(10,10,15,0.7);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .switcher button:hover {
+      border-color: var(--rose);
+      color: var(--cream);
+    }
+
+    .switcher button.active {
+      border-color: var(--rose);
+      color: var(--cream);
+      background: rgba(232,101,138,0.15);
+    }
+
+    .variant-label {
+      position: fixed;
+      top: 5vh;
+      right: 8vw;
+      z-index: 200;
+      text-align: right;
+    }
+
+    .variant-label .name {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--rose);
+      margin-bottom: 4px;
+    }
+
+    .variant-label .desc {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      max-width: 260px;
+    }
+
+    /* ——— KEYBOARD HINT ——— */
+    .hint {
+      position: fixed;
+      bottom: calc(5vh + 44px);
+      right: 8vw;
+      z-index: 200;
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      color: var(--text-muted);
+      opacity: 0.5;
+      letter-spacing: 0.05em;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="video-bg">
+    <video autoplay muted loop playsinline poster="hero-poster.jpg">
+      <source src="hero-bg.mp4" type="video/mp4">
+    </video>
+    <div class="video-overlay"></div>
+  </div>
+
+  <div class="page">
+    <header class="hero">
+      <h1>Ishita Jindal</h1>
+      <p class="tagline">Co-founder, Memory Store. Writing about AI and memory.</p>
+    </header>
+
+    <nav class="index">
+      <ol>
+        <li><a href="#">Post title goes here</a></li>
+        <li><a href="#">Another post title</a></li>
+        <li><a href="#">A third writing entry</a></li>
+        <li><a href="#">Something else entirely</a></li>
+        <li><a href="#">One more placeholder</a></li>
+      </ol>
+    </nav>
+
+    <footer class="links">
+      <a href="https://x.com/IshitaJindal17" target="_blank" rel="noopener noreferrer">x</a>
+      <span class="dot">&middot;</span>
+      <a href="https://linkedin.com/in/ishitajindal" target="_blank" rel="noopener noreferrer">linkedin</a>
+      <span class="dot">&middot;</span>
+      <a href="https://memory.store" target="_blank" rel="noopener noreferrer">memory store</a>
+      <span class="dot">&middot;</span>
+      <a href="mailto:ishita@memory.store">email</a>
+    </footer>
+  </div>
+
+  <!-- Variant label -->
+  <div class="variant-label">
+    <div class="name" id="variantName">A — SPACE MONO</div>
+    <div class="desc" id="variantDesc">Monospace everywhere. Technical, brutalist.</div>
+  </div>
+
+  <!-- Keyboard hint -->
+  <div class="hint">arrow keys or click to switch</div>
+
+  <!-- Switcher buttons -->
+  <div class="switcher">
+    <button class="active" data-variant="a">A</button>
+    <button data-variant="b">B</button>
+    <button data-variant="c">C</button>
+    <button data-variant="d">D</button>
+    <button data-variant="e">E</button>
+  </div>
+
+  <script>
+    const variants = {
+      a: {
+        name: 'A — SPACE MONO',
+        desc: 'Monospace everywhere. Technical, brutalist.',
+        h1: { fontFamily: "'Space Mono', monospace", fontWeight: '700', fontStyle: 'normal', letterSpacing: '0', fontSize: 'clamp(36px, 6vw, 64px)' },
+        tagline: { fontFamily: "'Space Mono', monospace", fontWeight: '400', fontStyle: 'italic', letterSpacing: '0' },
+        index: { fontFamily: "'Space Mono', monospace", fontWeight: '400', letterSpacing: '0' },
+        links: { fontFamily: "'Space Mono', monospace", fontWeight: '400', letterSpacing: '0', textTransform: 'none' }
+      },
+      b: {
+        name: 'B — PLAYFAIR + INTER',
+        desc: 'Editorial serif headline + clean sans body. The Collins approach.',
+        h1: { fontFamily: "'Playfair Display', serif", fontWeight: '700', fontStyle: 'normal', letterSpacing: '-0.02em', fontSize: 'clamp(36px, 6vw, 64px)' },
+        tagline: { fontFamily: "'Inter', sans-serif", fontWeight: '300', fontStyle: 'normal', letterSpacing: '0.01em' },
+        index: { fontFamily: "'Inter', sans-serif", fontWeight: '400', letterSpacing: '0.01em' },
+        links: { fontFamily: "'Inter', sans-serif", fontWeight: '400', letterSpacing: '0.02em', textTransform: 'none' }
+      },
+      c: {
+        name: 'C — INSTRUMENT SERIF + SPACE GROTESK',
+        desc: 'Contemporary serif + tech grotesque. The refined studio look.',
+        h1: { fontFamily: "'Instrument Serif', serif", fontWeight: '400', fontStyle: 'normal', letterSpacing: '-0.01em', fontSize: 'clamp(40px, 6.5vw, 72px)' },
+        tagline: { fontFamily: "'Space Grotesk', sans-serif", fontWeight: '300', fontStyle: 'normal', letterSpacing: '0.01em' },
+        index: { fontFamily: "'Space Grotesk', sans-serif", fontWeight: '400', letterSpacing: '0.01em' },
+        links: { fontFamily: "'Space Grotesk', sans-serif", fontWeight: '400', letterSpacing: '0.02em', textTransform: 'none' }
+      },
+      d: {
+        name: 'D — SYNE + INTER',
+        desc: 'Bold geometric display + clean sans. Modern agency energy.',
+        h1: { fontFamily: "'Syne', sans-serif", fontWeight: '700', fontStyle: 'normal', letterSpacing: '-0.03em', fontSize: 'clamp(38px, 6vw, 68px)' },
+        tagline: { fontFamily: "'Inter', sans-serif", fontWeight: '300', fontStyle: 'normal', letterSpacing: '0.01em' },
+        index: { fontFamily: "'Inter', sans-serif", fontWeight: '400', letterSpacing: '0.01em' },
+        links: { fontFamily: "'Inter', sans-serif", fontWeight: '400', letterSpacing: '0.02em', textTransform: 'none' }
+      },
+      e: {
+        name: 'E — CORMORANT GARAMOND + SPACE GROTESK',
+        desc: 'Light italic serif + grotesque. Fashion editorial, poetic.',
+        h1: { fontFamily: "'Cormorant Garamond', serif", fontWeight: '300', fontStyle: 'italic', letterSpacing: '0.01em', fontSize: 'clamp(44px, 7vw, 80px)' },
+        tagline: { fontFamily: "'Space Grotesk', sans-serif", fontWeight: '300', fontStyle: 'normal', letterSpacing: '0.02em' },
+        index: { fontFamily: "'Space Grotesk', sans-serif", fontWeight: '400', letterSpacing: '0.01em' },
+        links: { fontFamily: "'Space Grotesk', sans-serif", fontWeight: '300', letterSpacing: '0.03em', textTransform: 'lowercase' }
+      }
+    };
+
+    const h1 = document.querySelector('.hero h1');
+    const tagline = document.querySelector('.hero .tagline');
+    const indexLinks = document.querySelectorAll('.index ol li a');
+    const footerEls = document.querySelectorAll('.links a, .links .dot');
+    const buttons = document.querySelectorAll('.switcher button');
+    const variantName = document.getElementById('variantName');
+    const variantDesc = document.getElementById('variantDesc');
+
+    function applyVariant(key) {
+      const v = variants[key];
+      if (!v) return;
+
+      // Apply h1 styles
+      Object.assign(h1.style, v.h1);
+
+      // Apply tagline styles
+      Object.assign(tagline.style, v.tagline);
+
+      // Apply index link styles
+      indexLinks.forEach(a => Object.assign(a.style, v.index));
+
+      // Apply footer link styles
+      footerEls.forEach(el => Object.assign(el.style, v.links));
+
+      // Update label
+      variantName.textContent = v.name;
+      variantDesc.textContent = v.desc;
+
+      // Update active button
+      buttons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.variant === key);
+      });
+    }
+
+    // Button clicks
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => applyVariant(btn.dataset.variant));
+    });
+
+    // Arrow key navigation
+    const keys = ['a', 'b', 'c', 'd', 'e'];
+    let current = 0;
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        current = (current + 1) % keys.length;
+        applyVariant(keys[current]);
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        current = (current - 1 + keys.length) % keys.length;
+        applyVariant(keys[current]);
+      } else if (keys.includes(e.key.toLowerCase())) {
+        current = keys.indexOf(e.key.toLowerCase());
+        applyVariant(e.key.toLowerCase());
+      }
+    });
+  </script>
+</body>
+</html>
