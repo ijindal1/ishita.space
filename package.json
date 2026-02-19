@@ -1,0 +1,19 @@
+{
+  "name": "ishita-space",
+  "type": "module",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "deploy": "astro build && CLOUDFLARE_ACCOUNT_ID=e6e4a20faf3aec9bfee0ada5060fbf75 wrangler pages deploy dist --project-name=ishita-space"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^4.3.0",
+    "@astrojs/rss": "^4.0.0",
+    "@astrojs/sitemap": "^3.3.0",
+    "astro": "^5.17.1",
+    "markdown-it": "^14.0.0",
+    "sanitize-html": "^2.13.0"
+  }
+}

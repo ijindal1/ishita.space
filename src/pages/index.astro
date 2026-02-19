@@ -1,3 +1,16 @@
+---
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+function formatDate(date: Date): string {
+  const month = date.toLocaleDateString('en-US', { month: 'short' });
+  const year = date.getFullYear().toString().slice(-2);
+  return `${month} '${year}`;
+}
+---
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +19,7 @@
   <meta name="theme-color" content="#0A0A0F">
   <meta name="description" content="Ishita Jindal — Co-founder of Memory Store. Writing about AI and memory.">
   <title>Ishita Jindal</title>
+  <link rel="alternate" type="application/rss+xml" title="Ishita Jindal" href="/rss.xml" />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Space+Grotesk:wght@300;400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -95,11 +109,8 @@
       position: absolute;
       inset: 0;
       background:
-        /* Vignette — darken edges */
         radial-gradient(ellipse at center, transparent 30%, rgba(10,10,15,0.6) 100%),
-        /* Darken bottom for footer readability */
         linear-gradient(to bottom, transparent 60%, rgba(10,10,15,0.8) 100%),
-        /* Subtle overall tint to unify */
         linear-gradient(to bottom, rgba(10,10,15,0.25) 0%, rgba(10,10,15,0.15) 50%, rgba(10,10,15,0.4) 100%);
       z-index: 1;
     }
@@ -372,8 +383,8 @@
 
   <!-- Full-screen video background -->
   <div class="video-bg">
-    <video autoplay muted loop playsinline poster="hero-poster.jpg">
-      <source src="hero-bg.mp4" type="video/mp4">
+    <video autoplay muted loop playsinline poster="/hero-poster.jpg">
+      <source src="/hero-bg.mp4" type="video/mp4">
     </video>
     <div class="video-overlay"></div>
   </div>
@@ -394,7 +405,12 @@
       <div class="writing">
         <div class="section-title">Writing</div>
         <ol>
-          <li><a href="#">Post title goes here</a> <span class="date">Feb '26</span></li>
+          {posts.map(post => (
+            <li>
+              <a href={`/${post.id}/`}>{post.data.title}</a>
+              <span class="date">{formatDate(post.data.pubDate)}</span>
+            </li>
+          ))}
         </ol>
       </div>
 
