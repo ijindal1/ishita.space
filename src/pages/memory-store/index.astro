@@ -1,0 +1,612 @@
+---
+const pillars = [
+  {
+    marker: '01',
+    title: 'Continuity',
+    body: 'Memory that survives the conversation. Context that accrues instead of evaporating at the end of a session.',
+  },
+  {
+    marker: '02',
+    title: 'Retrieval',
+    body: 'Not a vector dump. Structured recall that weighs recency, salience, and the shape of what you asked.',
+  },
+  {
+    marker: '03',
+    title: 'Provenance',
+    body: 'Every memory traces back to the moment it was formed. Auditable, editable, forgettable on request.',
+  },
+];
+
+const timeline = [
+  { date: '2024', note: 'Founded. First prototypes of durable agent memory.' },
+  { date: '2025', note: 'Launched memories.new — a playground for memory-augmented agents.' },
+  { date: '2026', note: 'Building the memory layer for production AI systems.' },
+];
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0A0A0F">
+  <meta name="description" content="Memory Store — the memory layer for AI. A project by Ishita Jindal.">
+  <title>Memory Store — Ishita Jindal</title>
+  <link rel="alternate" type="application/rss+xml" title="Ishita Jindal" href="/rss.xml" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Space+Grotesk:wght@300;400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0A0A0F;
+      --bg-raised: #12121A;
+      --rose: #E8658A;
+      --magenta: #C43D6B;
+      --blush: #F2A0B5;
+      --deep-teal: #1A6B63;
+      --teal: #2AA89E;
+      --cream: #F0E6E0;
+      --text: #D4C8C0;
+      --text-muted: #8A7D78;
+      --hairline: rgba(212, 200, 192, 0.12);
+    }
+
+    ::selection {
+      background: rgba(220, 130, 160, 0.35);
+      color: var(--cream);
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      font-size: 15px;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* ——— SCAN LINES ——— */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: 100;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 1px,
+        rgba(255,255,255,0.012) 1px,
+        rgba(255,255,255,0.012) 2px
+      );
+    }
+
+    /* ——— NOISE GRAIN ——— */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      opacity: 0.03;
+      z-index: 101;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 256px 256px;
+    }
+
+    /* ——— AMBIENT GLOW FIELD ——— */
+    .ambient {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(800px 600px at 15% 10%, rgba(232, 101, 138, 0.10), transparent 70%),
+        radial-gradient(700px 500px at 85% 40%, rgba(42, 168, 158, 0.08), transparent 70%),
+        radial-gradient(900px 700px at 50% 110%, rgba(196, 61, 107, 0.06), transparent 70%);
+    }
+
+    /* ——— LAYOUT ——— */
+    .shell {
+      position: relative;
+      z-index: 10;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 40px 8vw 8vh;
+    }
+
+    /* ——— TOP BAR ——— */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 64px;
+    }
+
+    .topbar .back {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .topbar .back:hover {
+      color: var(--blush);
+    }
+
+    .topbar .crumb {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .topbar .crumb .accent {
+      color: var(--rose);
+    }
+
+    /* ——— HERO ——— */
+    .hero {
+      padding: 8vh 0 10vh;
+      border-bottom: 1px solid var(--hairline);
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 64px;
+      align-items: end;
+    }
+
+    .eyebrow {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 24px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .eyebrow::before {
+      content: '';
+      display: inline-block;
+      width: 24px;
+      height: 1px;
+      background: var(--teal);
+    }
+
+    .hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(48px, 8vw, 104px);
+      font-weight: 300;
+      font-style: italic;
+      line-height: 0.98;
+      letter-spacing: 0.005em;
+      color: var(--cream);
+      margin-bottom: 28px;
+      text-shadow:
+        0 2px 20px rgba(10,10,15,0.9),
+        0 0 40px rgba(232,101,138,0.15);
+    }
+
+    .hero h1 .ampersand {
+      color: var(--rose);
+      font-weight: 400;
+    }
+
+    .hero .deck {
+      font-size: clamp(15px, 1.5vw, 18px);
+      font-weight: 300;
+      color: var(--text);
+      max-width: 48ch;
+      line-height: 1.55;
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding-bottom: 8px;
+    }
+
+    .hero-meta dl {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 4px 24px;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+    }
+
+    .hero-meta dt {
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .hero-meta dd {
+      color: var(--cream);
+    }
+
+    .hero-meta dd a {
+      color: var(--cream);
+      text-decoration: none;
+      border-bottom: 1px dashed rgba(240, 230, 224, 0.3);
+      transition: color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .hero-meta dd a:hover {
+      color: var(--blush);
+      border-bottom-color: var(--blush);
+    }
+
+    /* ——— SECTION STRUCTURE ——— */
+    section.block {
+      padding: 10vh 0;
+      border-bottom: 1px solid var(--hairline);
+    }
+
+    section.block:last-of-type {
+      border-bottom: none;
+    }
+
+    .section-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .section-label::before {
+      content: attr(data-n);
+      color: var(--rose);
+      font-weight: 700;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--hairline);
+      margin-left: 8px;
+    }
+
+    .section-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(32px, 4vw, 48px);
+      font-weight: 300;
+      font-style: italic;
+      line-height: 1.15;
+      color: var(--cream);
+      max-width: 22ch;
+      margin-bottom: 40px;
+    }
+
+    .lede {
+      font-size: clamp(16px, 1.6vw, 19px);
+      font-weight: 300;
+      color: var(--text);
+      max-width: 60ch;
+      line-height: 1.65;
+    }
+
+    .lede + .lede {
+      margin-top: 18px;
+    }
+
+    .lede em {
+      color: var(--blush);
+      font-style: italic;
+    }
+
+    /* ——— PILLAR GRID ——— */
+    .pillars {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      margin-top: 48px;
+      background: var(--hairline);
+      border: 1px solid var(--hairline);
+    }
+
+    .pillar {
+      background: var(--bg);
+      padding: 36px 32px;
+      transition: background 0.3s ease;
+    }
+
+    .pillar:hover {
+      background: var(--bg-raised);
+    }
+
+    .pillar .marker {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      color: var(--rose);
+      margin-bottom: 20px;
+    }
+
+    .pillar h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px;
+      font-style: italic;
+      font-weight: 400;
+      color: var(--cream);
+      margin-bottom: 12px;
+    }
+
+    .pillar p {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text);
+    }
+
+    /* ——— TIMELINE ——— */
+    .timeline {
+      margin-top: 40px;
+      border-top: 1px solid var(--hairline);
+    }
+
+    .timeline .row {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 32px;
+      padding: 24px 0;
+      border-bottom: 1px solid var(--hairline);
+      align-items: baseline;
+    }
+
+    .timeline .date {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      color: var(--teal);
+    }
+
+    .timeline .note {
+      font-size: 15px;
+      color: var(--cream);
+      font-weight: 300;
+    }
+
+    /* ——— CTA ——— */
+    .cta {
+      margin-top: 48px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .cta a {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 22px;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border: 1px solid var(--hairline);
+      transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+
+    .cta a.primary {
+      color: var(--bg);
+      background: var(--cream);
+      border-color: var(--cream);
+    }
+
+    .cta a.primary:hover {
+      background: var(--blush);
+      border-color: var(--blush);
+    }
+
+    .cta a.ghost {
+      color: var(--cream);
+    }
+
+    .cta a.ghost:hover {
+      border-color: var(--rose);
+      color: var(--rose);
+    }
+
+    .cta a .arrow {
+      transition: transform 0.2s ease;
+    }
+
+    .cta a:hover .arrow {
+      transform: translateX(3px);
+    }
+
+    /* ——— FOOTER ——— */
+    .page-footer {
+      margin-top: 6vh;
+      padding-top: 32px;
+      border-top: 1px solid var(--hairline);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+    }
+
+    .page-footer a {
+      color: var(--text);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .page-footer a:hover {
+      color: var(--rose);
+    }
+
+    /* ——— RESPONSIVE ——— */
+    @media (max-width: 860px) {
+      .shell {
+        padding: 24px 6vw 6vh;
+      }
+
+      .topbar {
+        padding-bottom: 40px;
+      }
+
+      .hero {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        padding: 4vh 0 7vh;
+      }
+
+      .pillars {
+        grid-template-columns: 1fr;
+      }
+
+      .timeline .row {
+        grid-template-columns: 80px 1fr;
+        gap: 20px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero h1 {
+        font-size: 44px;
+      }
+
+      .section-heading {
+        font-size: 28px;
+      }
+
+      .pillar {
+        padding: 28px 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="ambient"></div>
+
+  <div class="shell">
+
+    <!-- Top bar -->
+    <nav class="topbar">
+      <a href="/" class="back">&larr; ishita.space</a>
+      <span class="crumb"><span class="accent">&sect;</span> projects / memory-store</span>
+    </nav>
+
+    <!-- Hero -->
+    <header class="hero">
+      <div>
+        <div class="eyebrow">A Project / In Flight</div>
+        <h1>Memory <span class="ampersand">&amp;</span> the <br/>machines that need it.</h1>
+        <p class="deck">
+          Memory Store is the memory layer for AI systems — durable context that
+          outlives a session, with structured retrieval and real provenance.
+        </p>
+      </div>
+
+      <aside class="hero-meta">
+        <dl>
+          <dt>Role</dt><dd>Co-founder</dd>
+          <dt>Founded</dt><dd>2024</dd>
+          <dt>Status</dt><dd>Building</dd>
+          <dt>Web</dt><dd><a href="https://memory.store" target="_blank" rel="noopener noreferrer">memory.store &nearr;</a></dd>
+          <dt>Playground</dt><dd><a href="https://memories.new" target="_blank" rel="noopener noreferrer">memories.new &nearr;</a></dd>
+        </dl>
+      </aside>
+    </header>
+
+    <!-- Premise -->
+    <section class="block">
+      <div class="section-label" data-n="01">Premise</div>
+      <h2 class="section-heading">Agents forget. That's the bug, not the feature.</h2>
+      <p class="lede">
+        Every time you close a chat, something is lost. The preferences you
+        taught it. The corrections you made. The project you were halfway
+        through. Today's models treat each conversation like a stranger &mdash;
+        polite, capable, and <em>entirely without history</em>.
+      </p>
+      <p class="lede">
+        Memory Store is the substrate that gives AI a before and an after: a
+        place to keep what matters, in a shape that's actually retrievable.
+      </p>
+    </section>
+
+    <!-- Pillars -->
+    <section class="block">
+      <div class="section-label" data-n="02">How it works</div>
+      <h2 class="section-heading">Three ideas, held in tension.</h2>
+
+      <div class="pillars">
+        {pillars.map(p => (
+          <div class="pillar">
+            <div class="marker">{p.marker}</div>
+            <h3>{p.title}</h3>
+            <p>{p.body}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Timeline -->
+    <section class="block">
+      <div class="section-label" data-n="03">Timeline</div>
+      <h2 class="section-heading">A brief chronology.</h2>
+
+      <div class="timeline">
+        {timeline.map(t => (
+          <div class="row">
+            <div class="date">{t.date}</div>
+            <div class="note">{t.note}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Contact -->
+    <section class="block">
+      <div class="section-label" data-n="04">Get in touch</div>
+      <h2 class="section-heading">Building something with memory?</h2>
+      <p class="lede">
+        If you're working on agents, assistants, or anything that needs to
+        remember &mdash; we want to talk.
+      </p>
+
+      <div class="cta">
+        <a class="primary" href="mailto:ishita@memory.store">
+          <span>ishita@memory.store</span>
+          <span class="arrow">&rarr;</span>
+        </a>
+        <a class="ghost" href="https://memory.store" target="_blank" rel="noopener noreferrer">
+          <span>Visit memory.store</span>
+          <span class="arrow">&nearr;</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="page-footer">
+      <span>&copy; Memory Store</span>
+      <a href="/">&larr; back to ishita.space</a>
+    </footer>
+
+  </div>
+
+</body>
+</html>
