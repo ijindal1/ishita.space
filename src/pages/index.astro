@@ -1,12 +1,33 @@
 ---
-import { getCollection } from 'astro:content';
+import { XMLParser } from 'fast-xml-parser';
 
-const posts = (await getCollection('blog', ({ data }) => !data.draft))
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const SUBSTACK_FEED = 'https://ishitajindal.substack.com/feed';
+
+type Post = { title: string; link: string; pubDate: Date };
+
+let posts: Post[] = [];
+try {
+  const res = await fetch(SUBSTACK_FEED);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const xml = await res.text();
+  const data = new XMLParser({ ignoreAttributes: false }).parse(xml);
+  const items = data?.rss?.channel?.item;
+  const itemArr = Array.isArray(items) ? items : items ? [items] : [];
+  posts = itemArr
+    .map((item: any) => ({
+      title: String(item.title ?? '').trim(),
+      link: String(item.link ?? '').trim(),
+      pubDate: new Date(item.pubDate),
+    }))
+    .filter((p: Post) => p.title && p.link && !isNaN(p.pubDate.valueOf()))
+    .sort((a: Post, b: Post) => b.pubDate.valueOf() - a.pubDate.valueOf());
+} catch (e) {
+  console.warn('Failed to fetch Substack feed:', e);
+}
 
 function formatDate(date: Date): string {
-  const month = date.toLocaleDateString('en-US', { month: 'short' });
-  const year = date.getFullYear().toString().slice(-2);
+  const month = date.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' });
+  const year = date.getUTCFullYear().toString().slice(-2);
   return `${month} '${year}`;
 }
 ---
@@ -19,7 +40,7 @@ function formatDate(date: Date): string {
   <meta name="theme-color" content="#0A0A0F">
   <meta name="description" content="Ishita Jindal — Co-founder of Memory Store. Writing about AI and memory.">
   <title>Ishita Jindal</title>
-  <link rel="alternate" type="application/rss+xml" title="Ishita Jindal" href="/rss.xml" />
+  <link rel="alternate" type="application/rss+xml" title="Ishita Jindal" href="https://ishitajindal.substack.com/feed" />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Space+Grotesk:wght@300;400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -407,8 +428,8 @@ function formatDate(date: Date): string {
         <ol>
           {posts.map(post => (
             <li>
-              <a href={`/${post.id}/`}>{post.data.title}</a>
-              <span class="date">{formatDate(post.data.pubDate)}</span>
+              <a href={post.link} target="_blank" rel="noopener noreferrer">{post.title}</a>
+              <span class="date">{formatDate(post.pubDate)}</span>
             </li>
           ))}
         </ol>
